@@ -1,0 +1,150 @@
+POST _application/search_application/sdpq6-3/_render_query
+POST _application/search_application/sdpq6-3/_search
+
+PUT _application/search_application/sdpq6-3
+{
+  "indices": ["search-elmex.de-u"], 
+  "template": {
+    "script": {
+      "lang": "mustache",
+      "source": """
+      {
+        "query": {
+          "bool": {
+            "must": [
+              {
+                "match": {
+                  "title.prefix": "{{search_term}}"
+                }
+              }
+            ],
+            "filter": [
+              {
+                "term": {
+                  "occ_category": "{{occ_category}}"
+                }
+              }
+            ]
+          }
+        },
+        "_source": [
+          "custom_ranking",
+          "id",
+          "url",
+          "image",
+          "title",
+          "shortDescription", 
+          "published_date",
+          "occ_brand",
+          "occ_category",
+          "occ_format",
+          "occ_tag",
+          "occ_type",
+          "referencedProduct",
+          "occ_letterTag"
+        ],
+        "size": "{{size}}",
+        "from": "{{from}}"
+      }
+      """,
+      "params": {
+        "search_term": "Implan",
+        "occ_category": "dictionary",
+        "size": 300,
+        "from": 0
+      }
+    } 
+  }
+}
+
+--------------------------
+Below has to be rendered:-
+--------------------------
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "title.prefix": "Implan"  // Searching for the prefix "Implan" in the title field
+          }
+        }
+      ],
+      "filter": [
+        {
+          "term": {
+            "occ_category": "dictionary"  // Filter for "dictionary" category
+          }
+        }
+      ]
+    }
+  },
+  "_source": [
+    "custom_ranking",
+    "id",
+    "url",
+    "image",
+    "title",
+    "shortDescription",  // shortDescription mapped to meta_description in Swifttype
+    "published_date",
+    "occ_brand",
+    "occ_category",
+    "occ_format",
+    "occ_tag",
+    "occ_type",
+    "referencedProduct",
+    "occ_letterTag"
+  ],
+  "size": 300,  // Limit to 300 results
+  "from": 0  // Start from the first result (page 1)
+}
+
+-----------------
+ Actual rendered
+-----------------
+{
+  "from": 0,
+  "size": 300,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "title.prefix": {
+              "query": "Implan"
+            }
+          }
+        }
+      ],
+      "filter": [
+        {
+          "term": {
+            "occ_category": {
+              "value": "dictionary"
+            }
+          }
+        }
+      ],
+      "boost": 1
+    }
+  },
+  "_source": {
+    "includes": [
+      "custom_ranking",
+      "id",
+      "url",
+      "image",
+      "title",
+      "shortDescription",
+      "published_date",
+      "occ_brand",
+      "occ_category",
+      "occ_format",
+      "occ_tag",
+      "occ_type",
+      "referencedProduct",
+      "occ_letterTag"
+    ],
+    "excludes": []
+  }
+}

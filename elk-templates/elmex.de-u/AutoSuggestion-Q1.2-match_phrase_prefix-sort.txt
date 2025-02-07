@@ -1,0 +1,86 @@
+POST _application/search_application/asq1-2/_render_query
+POST _application/search_application/asq1-2/_search
+
+PUT _application/search_application/asq1-2
+{
+  "indices": ["search-elmex.de-u"], 
+  "template": {
+    "script": {
+      "lang": "mustache",
+      "source": """
+      {
+        "_source": ["title"],
+        "size": "{{size}}",
+        "query": {
+          "match_phrase_prefix": {
+            "title": {
+              "query": "{{search_term}}"
+            }
+          }
+        },
+        "sort": [
+          {
+            "custom_ranking": {
+              "order": "{{sort_order}}"
+            }
+          }
+        ]
+      }
+      """,
+      "params": {
+        "search_term": "sea",
+        "size": 10,
+        "from": 0,
+        "sort_order": "desc"
+      }
+    } 
+  }
+}
+
+--------------------------
+Below has to be rendered:-
+--------------------------
+{
+  "_source": ["title"],  
+  "size": 10,
+  "query": {
+    "match_phrase_prefix": {
+      "title": {
+        "query": "sea"
+      }
+    }
+  },
+  "sort": [
+    {
+      "custom_rannking": {
+        "order": "desc"
+      }
+    }
+  ]
+}
+-----------------
+ Actual rendered
+-----------------
+{
+  "size": 10,
+  "query": {
+    "match_phrase_prefix": {
+      "title": {
+        "query": "sea"
+      }
+    }
+  },
+  "_source": {
+    "includes": [
+      "title"
+    ],
+    "excludes": []
+  },
+  "sort": [
+    {
+      "custom_ranking": {
+        "order": "desc"
+      }
+    }
+  ]
+}

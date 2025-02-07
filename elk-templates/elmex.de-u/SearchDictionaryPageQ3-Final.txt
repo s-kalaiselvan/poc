@@ -1,0 +1,124 @@
+/*
+//Equivalent of SwiftType Query  
+PageUrl: https://www.elmex.de/articles/dictionary?letter=*
+SwiftType Query: 
+https://api.swiftype.com/api/v1/public/engines/search.json?per_page=100&engine_key=1qBJfaViKQq3DxjrVhXY&q=&fetch_fields%5Bpage%5D%5B%5D=custom_ranking&fetch_fields%5Bpage%5D%5B%5D=id&fetch_fields%5Bpage%5D%5B%5D=url&fetch_fields%5Bpage%5D%5B%5D=image&fetch_fields%5Bpage%5D%5B%5D=title&fetch_fields%5Bpage%5D%5B%5D=shortDescription&fetch_fields%5Bpage%5D%5B%5D=published_date&fetch_fields%5Bpage%5D%5B%5D=occ_brand&fetch_fields%5Bpage%5D%5B%5D=occ_category&fetch_fields%5Bpage%5D%5B%5D=occ_format&fetch_fields%5Bpage%5D%5B%5D=occ_tag&fetch_fields%5Bpage%5D%5B%5D=occ_type&fetch_fields%5Bpage%5D%5B%5D=referencedProduct&fetch_fields%5Bpage%5D%5B%5D=occ_letterTag&filters%5Bpage%5D%5Bocc_category%5D=dictionary&sort_field%5Bpage%5D=title&sort_direction%5Bpage%5D=asc&page=2
+*/
+POST _application/search_application/sdpq3/_render_query
+POST _application/search_application/sdpq3/_search
+
+PUT _application/search_application/sdpq3
+{
+  "indices": ["search-elmex.de-u"],
+  "template": {
+  "script": {
+    "lang": "mustache",
+    "source": """
+      {
+        "query": {
+          "multi_match": {
+            "query": "{{query_string}}",
+            "fields": [{{#text_fields}}"{{name}}",{{/text_fields}}]
+          }
+        },
+        "_source": [
+          "custom_ranking",
+          "id",
+          "url",
+          "image",
+          "title",
+          "shortDescription",
+          "published_date",
+          "occ_brand",
+          "occ_category",
+          "occ_format",
+          "occ_tag",
+          "occ_type",
+          "referencedProduct",
+          "occ_letterTag"
+        ],
+        "size": "{{size}}",
+        "from": "{{from}}"
+      }
+    """, 
+      "params": { 
+        "query_string": "sensitive", 
+        "text_fields": [ 
+          {"name": "title"}, 
+          {"name": "meta_description"}, 
+          {"name": "body_content"}, 
+          {"name": "headings"} 
+        ], 
+        "from": 0, 
+        "size": 10 
+      }
+    }
+  }
+}
+
+--------------------------
+Below has to be rendered:-
+--------------------------
+{
+  "query": {
+    "multi_match": {
+      "query": "sensitive",
+      "fields": ["title", "meta_description", "body_content", "headings"]
+    }
+  },
+  "_source": [
+    "custom_ranking",
+    "id",
+    "url",
+    "image",
+    "title",
+    "shortDescription", //short-description
+    "published_date",
+    "occ_brand",
+    "occ_category",
+    "occ_format",
+    "occ_tag",
+    "occ_type",
+    "referencedProduct",
+    "occ_letterTag"
+  ],
+  "size": 10,
+  "from": 0
+}
+-----------------
+Actual rendered
+-----------------
+{
+  "from": 0,
+  "size": 10,
+  "query": {
+    "multi_match": {
+      "query": "sensitive",
+      "fields": [
+        "body_content^1.0",
+        "headings^1.0",
+        "meta_description^1.0",
+        "title^1.0"
+      ]
+    }
+  },
+  "_source": {
+    "includes": [
+      "custom_ranking",
+      "id",
+      "url",
+      "image",
+      "title",
+      "shortDescription",
+      "published_date",
+      "occ_brand",
+      "occ_category",
+      "occ_format",
+      "occ_tag",
+      "occ_type",
+      "referencedProduct",
+      "occ_letterTag"
+    ],
+    "excludes": []
+  }
+}

@@ -1,0 +1,55 @@
+POST _application/search_application/sdpq6-1-d/_render_query
+POST _application/search_application/sdpq6-1-d/_search
+
+PUT _application/search_application/sdpq6-1-d
+{
+  "indices": ["search-elmex.de-u"], 
+  "template": {
+    "script": {
+      "lang": "mustache",
+      "source": """
+        {
+          "query": {
+            "query_string": {
+              "query": "*{{search_term}}*",
+              "fields": ["title", "body_content"],
+              "default_operator": "{{default_operator}}"
+            }
+          }
+        }
+      """,
+      "params": {
+        "search_term": "planta",
+        "default_operator": "or"
+      }
+    } 
+  }
+}
+
+
+--------------------------
+Below has to be rendered:-
+--------------------------
+{
+  "query": {
+    "query_string": {
+      "query": "*planta*",
+      "fields": ["title", "body_content"],
+      "default_operator": "or"
+    }
+  }
+}
+-----------------
+ Actual rendered
+-----------------
+{
+  "query": {
+    "query_string": {
+      "query": "*planta*",
+      "fields": [
+        "body_content^1.0",
+        "title^1.0"
+      ]
+    }
+  }
+}

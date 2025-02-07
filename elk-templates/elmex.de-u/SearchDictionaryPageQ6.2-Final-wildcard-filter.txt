@@ -1,0 +1,138 @@
+POST _application/search_application/sdpq6-2/_render_query
+POST _application/search_application/sdpq6-2/_search
+
+PUT _application/search_application/sdpq6-2
+{
+  "indices": ["search-elmex.de-u"], 
+  "template": {
+    "script": {
+      "lang": "mustache",
+      "source": """
+       {
+        "query": {
+          "bool": {
+            "must": [
+              {
+                "wildcard": {
+                  "title": {
+                    "value": "*{{search_term}}*"
+                  }
+                }
+              }
+            ],
+            "filter": [
+              {
+                "term": {
+                  "occ_category": "{{occ_category}}"
+                }
+              }
+            ]
+          }
+        },
+        "_source": [
+          "id", 
+          "url", 
+          "image", 
+          "title", 
+          "shortDescription",
+          "published_date",
+          "occ_category",
+          "occ_tag"
+        ],
+        "size": "{{size}}",
+        "from": "{{from}}"
+      }
+      """,
+      "params": {
+        "search_term": "planta",
+        "occ_category": "dictionary",
+        "size": 10,
+        "from": 0
+      }
+    } 
+  }
+}
+
+
+--------------------------
+Below has to be rendered:-
+--------------------------
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "wildcard": {
+            "title": {
+              "value": "*planta*"  // Searching for any occurrence of "planta" within the title
+            }
+          }
+        }
+      ],
+      "filter": [
+        {
+          "term": {
+            "occ_category": "dictionary"  // Filter for occurrences in the "dictionary" category
+          }
+        }
+      ]
+    }
+  },
+  "_source": [
+    "id", 
+    "url", 
+    "image", 
+    "title", 
+    "shortDescription",
+    "published_date",
+    "occ_category",
+    "occ_tag"
+  ],
+  "size": 10,
+  "from": 0
+}
+
+-----------------
+ Actual rendered
+-----------------
+{
+  "from": 0,
+  "size": 10,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "wildcard": {
+            "title": {
+              "wildcard": "*planta*",
+              "boost": 1
+            }
+          }
+        }
+      ],
+      "filter": [
+        {
+          "term": {
+            "occ_category": {
+              "value": "dictionary"
+            }
+          }
+        }
+      ],
+      "boost": 1
+    }
+  },
+  "_source": {
+    "includes": [
+      "id",
+      "url",
+      "image",
+      "title",
+      "shortDescription",
+      "published_date",
+      "occ_category",
+      "occ_tag"
+    ],
+    "excludes": []
+  }
+}

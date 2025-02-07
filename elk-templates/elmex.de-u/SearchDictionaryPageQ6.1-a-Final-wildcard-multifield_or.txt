@@ -1,0 +1,138 @@
+POST _application/search_application/sdpq6-1-a/_render_query
+POST _application/search_application/sdpq6-1-a/_search
+
+PUT _application/search_application/sdpq6-1-a
+{
+  "indices": ["search-elmex.de-u"], 
+  "template": {
+  "script": {
+    "lang": "mustache",
+    "source": """
+      {
+        "query": {
+          "bool": {
+            "should": [
+              {
+                "wildcard": {
+                  "title": {
+                    "value": "*{{search_term}}*"
+                  }
+                }
+              },
+              {
+                "wildcard": {
+                  "body_content": {
+                    "value": "*{{search_term}}*"
+                  }
+                }
+              }
+            ],
+            "minimum_should_match": 1
+          }
+        },
+        "_source": [
+          "id", 
+          "url", 
+          "image", 
+          "title", 
+          "shortDescription",
+          "published_date",
+          "occ_category",
+          "occ_tag"
+        ],
+        "size": "{{size}}",
+        "from": "{{from}}"
+      }
+    """,
+    "params": {
+      "search_term": "planta",
+      "size": 10,
+      "from": 0
+    }
+  }
+  }
+}
+
+--------------------------
+Below has to be rendered:-
+--------------------------
+{
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "wildcard": {
+            "title": {
+              "value": "*planta*"
+            }
+          }
+        },
+        {
+          "wildcard": {
+            "body_content": {
+              "value": "*planta*"
+            }
+          }
+        }
+      ],
+      "minimum_should_match": 1
+    }
+  },
+  "_source": [
+    "id", 
+    "url", 
+    "image", 
+    "title", 
+    "shortDescription",
+    "published_date",
+    "occ_category",
+    "occ_tag"
+  ],
+  "size": 10,
+  "from": 0
+}
+
+-----------------
+ Actual rendered
+-----------------
+{
+  "from": 0,
+  "size": 10,
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "wildcard": {
+            "title": {
+              "wildcard": "*planta*",
+              "boost": 1
+            }
+          }
+        },
+        {
+          "wildcard": {
+            "body_content": {
+              "wildcard": "*planta*",
+              "boost": 1
+            }
+          }
+        }
+      ],
+      "minimum_should_match": "1",
+      "boost": 1
+    }
+  },
+  "_source": {
+    "includes": [
+      "id",
+      "url",
+      "image",
+      "title",
+      "shortDescription",
+      "published_date",
+      "occ_category",
+      "occ_tag"
+    ],
+    "excludes": []
+  }
+}

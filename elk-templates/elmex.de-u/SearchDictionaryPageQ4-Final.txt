@@ -1,0 +1,124 @@
+POST _application/search_application/sdpq4/_render_query
+POST _application/search_application/sdpq4/_search
+
+PUT _application/search_application/sdpq4
+{
+  "indices": ["search-elmex.de-u"], 
+  "template": {
+	  "script": {
+		"lang": "mustache",
+		"source": """
+		  {
+			"query": {
+			  "bool": {
+          "must": [{
+            "match": {
+              "title": "{{query_string}}"
+            }
+          }]
+			  }
+			},
+		"_source": [
+		  "custom_ranking",
+		  "id",
+		  "url",
+		  "image",
+		  "title",
+		  "shortDescription",
+		  "published_date",
+		  "occ_brand",
+		  "occ_category",
+		  "occ_format",
+		  "occ_tag",
+		  "occ_type",
+		  "referencedProduct",
+		  "occ_letterTag"
+		],
+		"size": "{{size}}",
+		"from": "{{from}}"
+	  }
+	  """,
+      "params": { 
+        "query_string": "sensitive",
+        "from": 0, 
+        "size": 300 
+      }
+    }
+  }
+}
+
+--------------------------
+Below has to be rendered:-
+--------------------------
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": { //adjust this to search within /full text
+            "title": "sensitive"  // Search for the term "sensitive" in the title field
+          }
+        }
+      ]
+    }
+  },
+  "_source": [
+    "custom_ranking",
+    "id",
+    "url",
+    "image",
+    "title",
+    "shortDescription",  // shortDescription mapped to meta_description in Swifttype
+    "published_date",
+    "occ_brand",
+    "occ_category",
+    "occ_format",
+    "occ_tag",
+    "occ_type",
+    "referencedProduct",
+    "occ_letterTag"
+  ],
+  "size": 300,  // Limit to 10 results per page
+  "from": 0   // Start from the first result (page 1)
+}
+
+-----------------
+Actual rendered
+-----------------
+{
+  "from": 0,
+  "size": 300,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "title": {
+              "query": "sensitive"
+            }
+          }
+        }
+      ],
+      "boost": 1
+    }
+  },
+  "_source": {
+    "includes": [
+      "custom_ranking",
+      "id",
+      "url",
+      "image",
+      "title",
+      "shortDescription",
+      "published_date",
+      "occ_brand",
+      "occ_category",
+      "occ_format",
+      "occ_tag",
+      "occ_type",
+      "referencedProduct",
+      "occ_letterTag"
+    ],
+    "excludes": []
+  }
+}

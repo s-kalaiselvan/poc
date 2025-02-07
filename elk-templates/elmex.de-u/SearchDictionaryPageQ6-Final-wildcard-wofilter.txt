@@ -1,0 +1,96 @@
+POST _application/search_application/sdpq6/_render_query
+POST _application/search_application/sdpq6/_search
+
+PUT _application/search_application/sdpq6
+{
+  "indices": ["search-elmex.de-u"], 
+  "template": {
+    "script": {
+      "lang": "mustache",
+      "source": """
+      {
+        "query": {
+          "wildcard": {
+            "title": {
+              "value": "*{{search_term}}*"
+            }
+          }
+        },
+        "_source": [
+          "id", 
+          "url", 
+          "image", 
+          "title", 
+          "shortDescription",
+          "published_date",
+          "occ_category",
+          "occ_tag"
+        ],
+        "size": "{{size}}",
+        "from": "{{from}}"
+      }
+    """,
+      "params": {
+        "search_term": "planta",
+        "size": 10,
+        "from": 0
+      }
+    }
+  }
+}
+
+
+--------------------------
+Below has to be rendered:-
+--------------------------
+{
+  "query": {
+    "wildcard": {
+      "title": {
+        "value": "*planta*"  // Searching for any occurrence of "planta" within the title
+      }
+    }
+  },
+  "_source": [
+    "id", 
+    "url", 
+    "image", 
+    "title", 
+    "shortDescription",
+    "published_date",
+    "occ_category",
+    "occ_tag"
+  ],
+  "size": 10,
+  "from": 0
+}
+
+
+-----------------
+ Actual rendered
+-----------------
+{
+  "from": 0,
+  "size": 10,
+  "query": {
+    "wildcard": {
+      "title": {
+        "wildcard": "*planta*",
+        "boost": 1
+      }
+    }
+  },
+  "_source": {
+    "includes": [
+      "id",
+      "url",
+      "image",
+      "title",
+      "shortDescription",
+      "published_date",
+      "occ_category",
+      "occ_tag"
+    ],
+    "excludes": []
+  }
+}

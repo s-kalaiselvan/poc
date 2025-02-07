@@ -1,0 +1,89 @@
+POST _application/search_application/asq2/_render_query
+POST _application/search_application/asq2/_search
+
+PUT _application/search_application/asq2
+{
+  "indices": ["search-elmex.de-u"], 
+  "template": {
+    "script": {
+      "lang": "mustache",
+      "source": """
+      {
+        "_source": ["title", "created_at"],
+        "size": "{{size}}",
+        "query": {
+          "wildcard": {
+            "title": {
+              "value": "{{search_term}}"
+            }
+          }
+        },
+        "sort": [
+          {
+            "last_crawled_at": {
+              "order": "{{sort_order}}"
+            }
+          }
+        ]
+      }
+      """,
+      "params": {
+          "search_term": "*planta*",
+          "size": 10,
+          "from": 0,
+          "sort_order": "desc"
+      }
+    } 
+  }
+}
+
+--------------------------
+Below has to be rendered:-
+--------------------------
+{
+  "_source": ["title", "created_at"],  
+  "size": 10,
+  "query": {
+    "wildcard": {
+      "title": {
+        "value": "*planta*"
+      }
+    }
+  },
+  "sort": [
+    {
+      "last_crawled_at": {
+        "order": "desc"
+      }
+    }
+  ]
+}
+
+-----------------
+ Actual rendered
+-----------------
+{
+  "size": 10,
+  "query": {
+    "wildcard": {
+      "title": {
+        "wildcard": "*planta*",
+        "boost": 1
+      }
+    }
+  },
+  "_source": {
+    "includes": [
+      "title",
+      "created_at"
+    ],
+    "excludes": []
+  },
+  "sort": [
+    {
+      "last_crawled_at": {
+        "order": "desc"
+      }
+    }
+  ]
+}

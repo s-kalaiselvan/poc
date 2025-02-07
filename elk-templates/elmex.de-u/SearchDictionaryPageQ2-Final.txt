@@ -1,0 +1,164 @@
+/*
+//Equivalent of SwiftType Query  
+PageUrl: https://www.elmex.de/articles/dictionary?letter=*
+SwiftType Query: 
+https://api.swiftype.com/api/v1/public/engines/search.json?per_page=100&engine_key=1qBJfaViKQq3DxjrVhXY&q=&fetch_fields%5Bpage%5D%5B%5D=custom_ranking&fetch_fields%5Bpage%5D%5B%5D=id&fetch_fields%5Bpage%5D%5B%5D=url&fetch_fields%5Bpage%5D%5B%5D=image&fetch_fields%5Bpage%5D%5B%5D=title&fetch_fields%5Bpage%5D%5B%5D=shortDescription&fetch_fields%5Bpage%5D%5B%5D=published_date&fetch_fields%5Bpage%5D%5B%5D=occ_brand&fetch_fields%5Bpage%5D%5B%5D=occ_category&fetch_fields%5Bpage%5D%5B%5D=occ_format&fetch_fields%5Bpage%5D%5B%5D=occ_tag&fetch_fields%5Bpage%5D%5B%5D=occ_type&fetch_fields%5Bpage%5D%5B%5D=referencedProduct&fetch_fields%5Bpage%5D%5B%5D=occ_letterTag&filters%5Bpage%5D%5Bocc_category%5D=dictionary&sort_field%5Bpage%5D=title&sort_direction%5Bpage%5D=asc&page=2
+*/
+POST _application/search_application/sa-elmex.de-u/_render_query
+
+PUT _application/search_application/sa-elmex.de-u
+{
+  "indices": ["search-elmex.de-u"], 
+  "template": { 
+  "script": {
+    "lang": "mustache",
+    "source": """
+      {
+        "query": {
+          "bool": {
+            "must": [
+              { "match_all": {} }
+            ],
+            "filter": [
+              { "term": { "occ_category": "{{occ_category}}" }}
+            ]
+          }
+        },
+        "sort": [
+          {
+            "title.enum": {
+              "order": "{{order}}"
+            }
+          }
+        ],
+        "_source": [
+          "id",
+          "url",
+          "image",
+          "title",
+          "meta_description",
+          "occ_category",
+          "occ_tag",
+          "last_crawled_at",
+          "published_date",
+          "occ_brand",
+          "occ_format",
+          "occ_type",
+          "referencedProduct",
+          "occ_letterTag"
+        ],
+        "size": "{{size}}",
+        "from": "{{from}}"
+      }
+    """,
+      "params": {
+        "occ_category": "dictionary",
+        "order": "asc",
+        "from": 0,
+        "size": 100
+      }
+    }
+  }
+}
+
+--------------------------
+Below has to be rendered:-
+--------------------------
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match_all": {}  // No search term provided; equivalent to an empty query in Swifttype
+        }
+      ],
+      "filter": [
+        {
+          "term": { "occ_category": "dictionary" }  // Filter on occ_category = "dictionary"
+        }
+      ]
+    }
+  },
+  
+  "sort": [
+    {
+      "title.enum": {  // Sorting by "title" in ascending order
+        "order": "asc"
+      }
+    }
+  ],
+  "_source": [
+    "id",
+    "url",
+    "image",
+    "title",
+    "meta_description",  // Equivalent to shortDescription in Swifttype
+    "occ_category",
+    "occ_tag",
+    "last_crawled_at",
+     "published_date",
+     
+    //these fields does not exist in elastic crawl or swifttype crawl
+    "occ_brand",
+    "occ_format",
+    "occ_type",
+    "referencedProduct",
+    "occ_letterTag"
+  ],
+  "size": 100,  // Limit to 100 results per page
+  "from": 0  // Starting from the first result (page 1)
+}
+-----------------
+Actual rendered
+-----------------
+{
+  "from": 0,
+  "size": 300,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match_all": {
+            "boost": 1
+          }
+        }
+      ],
+      "filter": [
+        {
+          "term": {
+            "occ_category": {
+              "value": "dictionary"
+            }
+          }
+        }
+      ],
+      "boost": 1
+    }
+  },
+  "_source": {
+    "includes": [
+      "id",
+      "url",
+      "image",
+      "title",
+      "meta_description",
+      "occ_category",
+      "occ_tag",
+      "last_crawled_at",
+      "published_date",
+      "occ_brand",
+      "occ_format",
+      "occ_type",
+      "referencedProduct",
+      "occ_letterTag"
+    ],
+    "excludes": []
+  },
+  "sort": [
+    {
+      "title.enum": {
+        "order": "asc"
+      }
+    }
+  ]
+}

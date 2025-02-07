@@ -1,0 +1,63 @@
+POST _application/search_application/asq3-1/_render_query
+POST _application/search_application/asq3-1/_search
+
+PUT _application/search_application/asq3-1
+{
+  "indices": ["search-elmex.de-u"], 
+  "template": {
+    "script": {
+      "lang": "mustache",
+      "source": """
+      {
+        "_source": ["title"],
+        "size": "{{size}}",
+        "query": {
+          "regexp": {
+            "title": {
+              "value": "{{regexp_pattern}}"
+            }
+          }
+        }
+      }
+      """,
+      "params": {
+      	  "regexp_pattern": "sen.*",
+          "size": 5
+      }
+    } 
+  }
+}
+
+--------------------------
+Below has to be rendered:-
+--------------------------
+{
+ "_source": ["title"],  
+  "size": 5,
+  "query": {
+  	"regexp": { "title": "sen.*" }
+   }
+}
+
+-----------------
+ Actual rendered
+-----------------
+{
+  "size": 5,
+  "query": {
+    "regexp": {
+      "title": {
+        "value": "sen.*",
+        "flags_value": 255,
+        "max_determinized_states": 10000,
+        "boost": 1
+      }
+    }
+  },
+  "_source": {
+    "includes": [
+      "title"
+    ],
+    "excludes": []
+  }
+}

@@ -1,0 +1,58 @@
+POST _application/search_application/sa-elmex.de-u/_render_query
+
+PUT _application/search_application/sa-elmex.de-u 
+{ 
+  "indices": ["search-elmex.de-u"], 
+  "template": { 
+    "script": { 
+      "lang": "mustache", 
+      "source": """ 
+      { 
+        "query": {
+          "multi_match": {
+            "query": "{{query_string}}", 
+            "fields": [{{#text_fields}}"{{name}}",{{/text_fields}}]
+          } 
+        }, 
+        "_source": [ 
+          "id",  
+          "url",  
+          "image",  
+          "title",  
+          "meta_description", 
+          "occ_category",  
+          "occ_tag",  
+          "last_crawled_at", 
+          "occ_brand",  
+          "occ_format",  
+          "occ_type",  
+          "referencedProduct",  
+          "occ_letterTag",  
+          "published_date"  
+        ], 
+        "from": "{{from}}", 
+        "size": "{{size}}",
+        "highlight": {
+          "fields": {
+            "title": {},
+            "meta_description": {},
+            "body_content": {},
+            "headings": {}
+          }
+        }
+      }
+      """, 
+      "params": { 
+        "query_string": "suche", 
+        "text_fields": [ 
+          {"name": "title"}, 
+          {"name": "meta_description"}, 
+          {"name": "body_content"}, 
+          {"name": "headings"} 
+        ], 
+        "from": 0, 
+        "size": 10 
+      } 
+    } 
+  } 
+}

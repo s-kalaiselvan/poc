@@ -1,0 +1,171 @@
+POST _application/search_application/sdpq5/_render_query
+POST _application/search_application/sdpq5/_search
+
+PUT _application/search_application/sdpq5
+{
+  "indices": ["search-elmex.de-u"], 
+  "template": {
+	  "script": {
+		"lang": "mustache",
+		"source": """
+		  {
+			"query": {
+			  "bool": {
+				"must": [
+				  {
+					"multi_match": {
+						"query": "{{query_string}}",
+						"fields": [{{#text_fields}}"{{name}}",{{/text_fields}}]
+					 }
+				  }
+				],
+				"filter": [
+				  {
+					"term": {
+					  "occ_category": "{{occ_category}}"
+					}
+				  }
+				]
+			  }
+			},
+			"_source": [
+			  "id", 
+			  "url", 
+			  "image", 
+			  "title", 
+			  "meta_description",
+			  "occ_category", 
+			  "occ_tag", 
+			  "last_crawled_at",
+			  "published_date"
+			],
+			"size": "{{size}}",
+			"from": "{{from}}",
+			"highlight": {
+			  "fields": {
+				"title": {},
+				"meta_description": {},
+				"body_content": {},
+				"headings": {}
+			  }
+			}
+		  }
+		""",
+      "params": { 
+        "query_string": "sensitive", 
+        "text_fields": [ 
+          {"name": "title"}, 
+          {"name": "meta_description"}, 
+          {"name": "body_content"}, 
+          {"name": "headings"} 
+        ], 
+        "from": 0, 
+        "size": 300 
+      }
+    }
+  }
+}
+
+--------------------------
+Below has to be rendered:-
+--------------------------
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "multi_match": {
+            "query": "sensitive",  // Search for the term "Elmex"
+            "fields": ["title", "meta_description", "body_content", "headings"]  // Fields to search for the term
+          }
+        }
+      ],
+      "filter": [
+        {
+          "term": {
+            "occ_category": "dictionary"  // Filter for occurrences in the "dictionary" category
+          }
+        }
+      ]
+    }
+  },
+  "_source": [
+    "id", 
+    "url", 
+    "image", 
+    "title", 
+    "meta_description",  // Equivalent to shortDescription
+    "occ_category", 
+    "occ_tag", 
+    "last_crawled_at",
+    "published_date" 
+  ],
+  "size": 300,  // Limit to 300 results per page (equivalent to per_page=10)
+  "from": 0,  // Starting from the first result (page 1)
+
+  "highlight": {
+    "fields": {
+      "title": {},
+      "meta_description": {},
+      "body_content": {},
+      "headings": {}
+    }
+  }
+}
+
+-----------------
+ Actual rendered
+-----------------
+{
+  "from": 0,
+  "size": 300,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "multi_match": {
+            "query": "sensitive",
+            "fields": [
+              "body_content^1.0",
+              "headings^1.0",
+              "meta_description^1.0",
+              "title^1.0"
+            ]
+          }
+        }
+      ],
+      "filter": [
+        {
+          "term": {
+            "occ_category": {
+              "value": ""
+            }
+          }
+        }
+      ],
+      "boost": 1
+    }
+  },
+  "_source": {
+    "includes": [
+      "id",
+      "url",
+      "image",
+      "title",
+      "meta_description",
+      "occ_category",
+      "occ_tag",
+      "last_crawled_at",
+      "published_date"
+    ],
+    "excludes": []
+  },
+  "highlight": {
+    "fields": {
+      "title": {},
+      "meta_description": {},
+      "body_content": {},
+      "headings": {}
+    }
+  }
+}

@@ -1,0 +1,201 @@
+POST _application/search_application/sdpq1/_render_query
+
+PUT _application/search_application/sdpq1
+{ 
+  "indices": ["search-elmex.de-u"], 
+  "template": { 
+  "script": {
+    "lang": "mustache",
+    "source": """
+      {
+        "query": {
+          "bool": {
+            "must": [
+              { "match_all": {} }
+            ],
+            "filter": [
+              { "term": { "occ_category": "{{occ_category}}" }},
+              { "term": { "occ_tag": "{{occ_tag}}" }}
+            ]
+          }
+        },
+        "sort": [
+          {
+            "title.enum": {
+            "order": "{{order}}"
+            }
+          }
+        ],
+        "_source": [
+          "id",
+          "url",
+          "image",
+          "title",
+          "meta_description",
+          "occ_category",
+          "occ_tag",
+          "last_crawled_at",
+          "published_date",
+          "occ_brand",
+          "occ_format",
+          "occ_type",
+          "referencedProduct",
+          "occ_letterTag"
+        ],
+        "from": "{{from}}",
+        "size": "{{size}}",
+        "highlight": {
+          "fields": {
+            "title": {},
+            "meta_description": {},
+            "body_content": {},
+            "headings": {}
+          }
+        }
+      }
+      """,
+      "params": {
+        "occ_category": "dictionary",
+        "occ_tag": "b",
+        "order": "asc",
+        "from": 0,
+        "size": 300
+      }
+    }
+  }
+}
+
+--------------------------
+Below has to be rendered:-
+--------------------------
+/*
+//Equivalent of SwiftType Query  
+PageUrl: https://www.elmex.de/articles/dictionary?letter=a
+SwiftType Query: 
+https://api.swiftype.com/api/v1/public/engines/search.json?per_page=100&engine_key=1qBJfaViKQq3DxjrVhXY&q=&fetch_fields[page][]=custom_ranking&fetch_fields[page][]=id&fetch_fields[page][]=url&fetch_fields[page][]=image&fetch_fields[page][]=title&fetch_fields[page][]=shortDescription&fetch_fields[page][]=published_date&fetch_fields[page][]=occ_brand&fetch_fields[page][]=occ_category&fetch_fields[page][]=occ_format&fetch_fields[page][]=occ_tag&fetch_fields[page][]=occ_type&fetch_fields[page][]=referencedProduct&fetch_fields[page][]=occ_letterTag&filters[page][occ_category]=dictionary&filters[page][occ_tag]=a&sort_field[page]=title&sort_direction[page]=asc&page=1
+*/
+
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match_all": {}  // No search term provided; equivalent to an empty query in Swifttype
+        }
+      ],
+      "filter": [
+        {
+          "term": { "occ_category": "dictionary" }  // Filter on occ_category = "dictionary", change occ_category to category (analyze other sites and make it consistent across all brand sites)
+        },
+        {
+          "term": { "occ_tag": "b" }  // Filter on occ_tag = "a" , change occ_category to category (analyze other sites and make it consistent across all brand sites)
+        }
+      ]
+    }
+  },
+  /**/
+  "sort": [
+    {
+      "title.enum": {  // Sorting by "title" in ascending order
+        "order": "asc"
+      }
+    }
+  ],
+  "_source": [
+    "id",
+    "url",
+    "image",
+    "title",
+    "meta_description",  // Equivalent to shortDescription in Swifttype , shortDescription did not get indexed because of camel format naming convention
+    "occ_category",
+    "occ_tag",
+    "last_crawled_at",   
+    "published_date",     
+    
+    //these fields does not exist in elastic crawl or swifttype crawl
+    "occ_brand",
+    "occ_format",
+    "occ_type",
+    "referencedProduct",
+    "occ_letterTag"
+  ],
+  "size": 100,  // Limit to 100 results per page
+  "from": 0 , // Starting from the first result (page 1)
+   "highlight": {
+    "fields": {
+      "title": {},
+      "meta_description": {},
+      "body_content": {},
+      "headings": {}
+    }
+   }
+}
+-----------------
+Actual rendered
+-----------------
+{
+  "from": 0,
+  "size": 300,
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match_all": {
+            "boost": 1
+          }
+        }
+      ],
+      "filter": [
+        {
+          "term": {
+            "occ_category": {
+              "value": "dictionary"
+            }
+          }
+        },
+        {
+          "term": {
+            "occ_tag": {
+              "value": "b"
+            }
+          }
+        }
+      ],
+      "boost": 1
+    }
+  },
+  "_source": {
+    "includes": [
+      "id",
+      "url",
+      "image",
+      "title",
+      "meta_description",
+      "occ_category",
+      "occ_tag",
+      "last_crawled_at",
+      "published_date",
+      "occ_brand",
+      "occ_format",
+      "occ_type",
+      "referencedProduct",
+      "occ_letterTag"
+    ],
+    "excludes": []
+  },
+  "sort": [
+    {
+      "title.enum": {
+        "order": "asc"
+      }
+    }
+  ],
+  "highlight": {
+    "fields": {
+      "title": {},
+      "meta_description": {},
+      "body_content": {},
+      "headings": {}
+    }
+  }
+}
