@@ -1,0 +1,101 @@
+POST /_application/search_application/sa-elmex.de-u/_render_query
+{
+  "params": {
+    "query_string": "suche",
+    "input_fields": [
+      {"name": "title", "isLast": false},
+      {"name": "meta_description", "isLast": false},
+      {"name": "body_content", "isLast": false},
+      {"name": "headings", "isLast": true}
+    ],
+    "filters": [
+      {"key": "occ_category", "value": "dictionary"},
+      {"key": "occ_tag", "value": "p"}
+    ],
+    "output_fields": ["id", "url", "image", "title", "meta_description", "occ_category", "occ_tag", "last_crawled_at"],
+    "sort_field": "date",
+    "sort_order": "desc",
+    "from": 0,
+    "size": 10
+  }
+}
+
+
+GET /_application/search_application/sa-elmex.de-u/_search
+{
+  "params": {
+    "query_string": "suche",
+    "input_fields": [
+      {"name": "title", "isLast": false},
+      {"name": "meta_description", "isLast": false},
+      {"name": "body_content", "isLast": false},
+      {"name": "headings", "isLast": true}
+    ],
+    "filters": [
+      {"key": "occ_category", "value": "dictionary"},
+      {"key": "occ_tag", "value": "p"}
+    ],
+    "output_fields": ["id", "url", "image", "title", "meta_description", "occ_category", "occ_tag", "last_crawled_at"],
+    "sort_field": "date",
+    "sort_order": "desc",
+    "from": 0,
+    "size": 10
+  }
+}
+
+DELETE /_application/search_application/sa-elmex.de-u
+PUT /_application/search_application/sa-elmex.de-u
+{
+  "indices": ["search-elmex.de-u"],
+  "template": {
+    "script": {
+      "lang": "mustache",
+      "source": """
+        {
+          "query": {
+            "bool": {
+              "must": [
+                {
+                  "multi_match": {
+                    "query": "{{query_string}}",
+                    "fields": [
+                      {{#input_fields}}"{{name}}"{{^isLast}},{{/isLast}}{{/input_fields}}
+                    ],
+                    "operator": "or"
+                  }
+                }
+              ],
+              "filter": [
+                {{#filters}}
+                {
+                  "term": {
+                    "{{key}}": "{{value}}"
+                  }
+                }
+                {{#unless @last}},{{/unless}}
+                {{/filters}}
+              ]
+            }
+          },
+          "_source": {{#toJson output_fields}}{{output_fields}}{{/toJson}},
+          {{#sort_field}}
+          "sort": [
+            {
+              "{{sort_field}}": {
+                "order": "{{sort_order}}"
+              }
+            }
+          ],
+          {{/sort_field}}
+          "highlight": {
+            "fields": {
+              {{#output_fields}}"{{.}}": {}{{^isLast}},{{/isLast}}{{/output_fields}}
+            }
+          },
+          "from": "{{from}}",
+          "size": "{{size}}"
+        }
+      """
+    }
+  }
+}

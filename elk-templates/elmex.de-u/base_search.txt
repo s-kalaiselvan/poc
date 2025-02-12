@@ -1,0 +1,288 @@
+/////We need the below query as a template /////
+GET /search-elmex.de-u/_search
+{
+    "from": 0,
+    "size": 10,
+    "query": {
+        "bool": {
+            "must": [
+                {
+                    "multi_match": {
+                        "query": "suche",
+                        "fields": [
+                            "body_content",
+                            "headings",
+                            "meta_description",
+                            "title"
+                        ]
+                    }
+                }
+            ],
+            "boost": 1.0
+        }
+    },
+    "_source": {
+        "includes": [
+            "id", "url", "image", "title", "meta_description", "occ_category", "occ_tag", "last_crawled_at"
+        ],
+        "excludes": []
+    },
+    "sort": [
+        {
+            "date": {
+                "order": "desc"
+            }
+        }
+    ],
+    "highlight": {
+        "fields": {
+            "title": {},
+            "meta_description": {},
+            "body_content": {},
+            "headings": {}
+        }
+   }
+}
+///////////////////////////////////////////////
+ChatGpt provides below
+PUT _application/search_application/sa-elmex.de-u/
+{
+  //"indices": ["search-elmex.de-u"],
+  "template": {
+    "script": {
+      "lang": "mustache",
+      "source": """
+        {
+          "query": {
+            "bool": {
+              "must": [
+                {
+                  "multi_match": {
+                    "query": "{{query_string}}",
+                    "fields": [
+                      {{#fields}}"{{name}}^1.0"{{#unless @last}},{{/unless}}{{/fields}}
+                    ]
+                  }
+                }
+              ],
+              "boost": 1.0
+            }
+          },
+          "_source": {
+            "includes": [
+              "id", "url", "image", "title", "meta_description", "occ_category", "occ_tag", "last_crawled_at"
+            ],
+            "excludes": []
+          },
+          "sort": [
+            {
+              "date": {
+                "order": "desc"
+              }
+            }
+          ],
+          "highlight": {
+            "fields": {
+              "title": {},
+              "meta_description": {},
+              "body_content": {},
+              "headings": {}
+            }
+          },
+          "from": "{{from}}",
+          "size": "{{size}}"
+        }
+      """
+    },
+    "params": {
+      "query_string": "suche",
+      "fields": [
+        {"name": "body_content"},
+        {"name": "headings"},
+        {"name": "meta_description"},
+        {"name": "title"}
+      ],
+      "from": 0,
+      "size": 10
+    }
+  }
+}
+
+///////////////////////////////////////////////
+PUT _application/search_application/sa-elmex.de-u
+{
+  "indices": ["search-elmex.de-u"], 
+  "template": {
+    "script": {
+      "lang": "mustache",
+      "source": {
+        "query": {
+          "bool": {
+            "must": [
+              {
+                "multi_match": {
+                  "query": "{{query_string}}",
+                  "fields": "{{input_fields}}",
+                  "operator": "or"
+                }
+              }
+            ],
+            "filter": [
+              {
+                "term": {
+                  "occ_category": "{{occ_category}}"
+                }
+              },
+              {
+                "term": {
+                  "occ_tag": "{{occ_tag}}"
+                }
+              }
+            ]
+          }
+        },
+        "_source": "{{output_fields}}",
+        "highlight": {
+          "fields": {
+            "{{highlight_fields}}": {}
+          }
+        },
+        "sort": [
+          {
+            "{{sort_field}}": {
+              "order": "{{sort_order}}"
+            }
+          }
+        ],
+        "from": "{{from}}",
+        "size": "{{size}}"
+      }
+    }
+  }
+}
+//latest in dev tool
+PUT _application/search_application/sa-elmex.de-u
+{
+  "indices": ["search-elmex.de-u"],
+  "template": {
+    "script": {
+      "lang": "mustache",
+      "source": """
+      {
+        "query": {
+          "bool": {
+            "must": [
+              {
+                "multi_match": {
+                  "query": "{{query_string}}",
+                  "fields": [{{#input_fields}}"{{name}}"{{^last}},{{/last}}{{/input_fields}}],
+                  "operator": "or"
+                }
+              }
+            ],
+            "filter": [
+              {
+                "term": {
+                  "occ_category": "{{occ_category}}"
+                }
+              },
+              {
+                "term": {
+                  "occ_tag": "{{occ_tag}}"
+                }
+              }
+            ]
+          }
+        },        
+        "_source": "{{#output_fields}}{{.}}{{/output_fields}}",
+        "highlight": {
+          "fields": {
+            "{{highlight_fields}}": {}
+          }
+        },
+        "sort": [
+          {
+            "{{sort_field}}": {
+              "order": "{{sort_order}}"
+            }
+          }
+        ],
+        "from": "{{from}}",
+        "size": "{{size}}"
+      }
+      """
+    }
+  }
+}
+POST _application/search_application/sa-elmex.de-u/_render_query
+{
+  "params": {
+    "query_string": "suche",
+    "input_fields": [
+         {"name": "title"}, 
+          {"name": "meta_description"}, 
+          {"name": "body_content"}, 
+          {"name": "headings"} 
+    ],
+    "occ_category": "dictionary",
+    "occ_tag": "p",
+    "output_fields": ["id", "url", "image", "title", "meta_description", "occ_category", "occ_tag", "last_crawled_at"],
+	"highlight_fields": ["title", "meta_description", "body_content", "headings"],
+    "sort_field": "date",
+    "sort_order": "desc",
+    "from": 0,
+    "size": 10
+  }
+}
+// below is old one
+PUT _application/search_application/sa-elmex.de-u
+{
+  "indices": ["search-elmex.de-u"], 
+  "template": {
+    "script": {
+      "lang": "mustache",
+      "source": {
+        "query": {
+          "bool": {
+            "must": [
+              {
+                "multi_match": {
+                  "query": "{{query_string}}",
+                  "fields": "{{input_fields}}",
+                  "operator": "or"
+                }
+              }
+            ],
+            "filter": [
+              {
+                "term": {
+                  "occ_category": "{{occ_category}}"
+                }
+              },
+              {
+                "term": {
+                  "occ_tag": "{{occ_tag}}"
+                }
+              }
+            ]
+          }
+        },
+        "_source": "{{output_fields}}",
+        "highlight": {
+          "fields": {
+            "{{output_fields}}": {}
+          }
+        },
+        "sort": [
+          {
+            "{{sort_field}}": {
+              "order": "{{sort_order}}"
+            }
+          }
+        ],
+        "from": "{{from}}",
+        "size": "{{size}}"
+      }
+    }
+  }
+}

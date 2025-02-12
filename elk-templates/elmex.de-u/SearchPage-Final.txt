@@ -1,6 +1,6 @@
-POST _application/search_application/sa-elmex.de-u/_render_query
+POST _application/search_application/sp_final/_render_query
 
-PUT _application/search_application/sa-elmex.de-u 
+PUT _application/search_application/sp_final
 { 
   "indices": ["search-elmex.de-u"], 
   "template": { 

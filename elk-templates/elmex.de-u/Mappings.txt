@@ -1,0 +1,275 @@
+PUT /search-elmex.de-u/_mapping
+{
+  "properties": {
+    "date": {
+      "type": "date"
+    }
+  }
+}
+GET /search-elmex.de-u/_mapping
+=========================================
+{
+  "search-elmex.de-u": {
+    "mappings": {
+      "dynamic": "true",
+      "dynamic_templates": [
+        {
+          "data": {
+            "match_mapping_type": "string",
+            "mapping": {
+              "analyzer": "iq_text_base",
+              "fields": {
+                "prefix": {
+                  "search_analyzer": "q_prefix",
+                  "analyzer": "i_prefix",
+                  "type": "text",
+                  "index_options": "docs"
+                },
+                "delimiter": {
+                  "analyzer": "iq_text_delimiter",
+                  "type": "text",
+                  "index_options": "freqs"
+                },
+                "joined": {
+                  "search_analyzer": "q_text_bigram",
+                  "analyzer": "i_text_bigram",
+                  "type": "text",
+                  "index_options": "freqs"
+                },
+                "enum": {
+                  "ignore_above": 2048,
+                  "type": "keyword"
+                },
+                "stem": {
+                  "analyzer": "iq_text_stem",
+                  "type": "text"
+                }
+              },
+              "index_options": "freqs",
+              "type": "text"
+            }
+          }
+        }
+      ],
+      "properties": {
+        "additional_urls": {
+          "type": "keyword"
+        },
+        "body": {
+          "type": "text",
+          "fields": {
+            "delimiter": {
+              "type": "text",
+              "index_options": "freqs",
+              "analyzer": "iq_text_delimiter"
+            },
+            "enum": {
+              "type": "keyword",
+              "ignore_above": 2048
+            },
+            "joined": {
+              "type": "text",
+              "index_options": "freqs",
+              "analyzer": "i_text_bigram",
+              "search_analyzer": "q_text_bigram"
+            },
+            "prefix": {
+              "type": "text",
+              "index_options": "docs",
+              "analyzer": "i_prefix",
+              "search_analyzer": "q_prefix"
+            },
+            "stem": {
+              "type": "text",
+              "analyzer": "iq_text_stem"
+            }
+          },
+          "index_options": "freqs",
+          "analyzer": "iq_text_base"
+        },
+        "body_content": {
+          "type": "text",
+          "fields": {
+            "delimiter": {
+              "type": "text",
+              "index_options": "freqs",
+              "analyzer": "iq_text_delimiter"
+            },
+            "enum": {
+              "type": "keyword",
+              "ignore_above": 2048
+            },
+            "joined": {
+              "type": "text",
+              "index_options": "freqs",
+              "analyzer": "i_text_bigram",
+              "search_analyzer": "q_text_bigram"
+            },
+            "prefix": {
+              "type": "text",
+              "index_options": "docs",
+              "analyzer": "i_prefix",
+              "search_analyzer": "q_prefix"
+            },
+            "stem": {
+              "type": "text",
+              "analyzer": "iq_text_stem"
+            }
+          },
+          "index_options": "freqs",
+          "analyzer": "iq_text_base"
+        },
+        "custom_ranking": {
+          "type": "integer"
+        },
+        "date": {
+          "type": "date"
+        },
+        "domains": {
+          "type": "keyword"
+        },
+        "headings": {
+          "type": "text",
+          "fields": {
+            "delimiter": {
+              "type": "text",
+              "index_options": "freqs",
+              "analyzer": "iq_text_delimiter"
+            },
+            "enum": {
+              "type": "keyword",
+              "ignore_above": 2048
+            },
+            "joined": {
+              "type": "text",
+              "index_options": "freqs",
+              "analyzer": "i_text_bigram",
+              "search_analyzer": "q_text_bigram"
+            },
+            "prefix": {
+              "type": "text",
+              "index_options": "docs",
+              "analyzer": "i_prefix",
+              "search_analyzer": "q_prefix"
+            },
+            "stem": {
+              "type": "text",
+              "analyzer": "iq_text_stem"
+            }
+          },
+          "index_options": "freqs",
+          "analyzer": "iq_text_base"
+        },
+        "id": {
+          "type": "keyword"
+        },
+        "image": {
+          "type": "keyword"
+        },
+        "last_crawled_at": {
+          "type": "date"
+        },
+        "links": {
+          "type": "keyword"
+        },
+        "meta_description": {
+          "type": "text",
+          "fields": {
+            "delimiter": {
+              "type": "text",
+              "index_options": "freqs",
+              "analyzer": "iq_text_delimiter"
+            },
+            "enum": {
+              "type": "keyword",
+              "ignore_above": 2048
+            },
+            "joined": {
+              "type": "text",
+              "index_options": "freqs",
+              "analyzer": "i_text_bigram",
+              "search_analyzer": "q_text_bigram"
+            },
+            "prefix": {
+              "type": "text",
+              "index_options": "docs",
+              "analyzer": "i_prefix",
+              "search_analyzer": "q_prefix"
+            },
+            "stem": {
+              "type": "text",
+              "analyzer": "iq_text_stem"
+            }
+          },
+          "index_options": "freqs",
+          "analyzer": "iq_text_base"
+        },
+        "meta_keywords": {
+          "type": "keyword"
+        },
+        "occ_category": {
+          "type": "keyword"
+        },
+        "occ_tag": {
+          "type": "keyword"
+        },
+        "title": {
+          "type": "text",
+          "fields": {
+            "delimiter": {
+              "type": "text",
+              "index_options": "freqs",
+              "analyzer": "iq_text_delimiter"
+            },
+            "enum": {
+              "type": "keyword",
+              "ignore_above": 2048
+            },
+            "joined": {
+              "type": "text",
+              "index_options": "freqs",
+              "analyzer": "i_text_bigram",
+              "search_analyzer": "q_text_bigram"
+            },
+            "prefix": {
+              "type": "text",
+              "index_options": "docs",
+              "analyzer": "i_prefix",
+              "search_analyzer": "q_prefix"
+            },
+            "stem": {
+              "type": "text",
+              "analyzer": "iq_text_stem"
+            }
+          },
+          "index_options": "freqs",
+          "analyzer": "iq_text_base"
+        },
+        "url": {
+          "type": "keyword"
+        },
+        "url_host": {
+          "type": "keyword"
+        },
+        "url_path": {
+          "type": "keyword"
+        },
+        "url_path_dir1": {
+          "type": "keyword"
+        },
+        "url_path_dir2": {
+          "type": "keyword"
+        },
+        "url_path_dir3": {
+          "type": "keyword"
+        },
+        "url_port": {
+          "type": "keyword"
+        },
+        "url_scheme": {
+          "type": "keyword"
+        }
+      }
+    }
+  }
+}

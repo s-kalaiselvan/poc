@@ -1,0 +1,159 @@
+POST /_application/search_application/sa-elmex.de-u/_render_query
+{
+    "params": {
+      "query_string": "suche",
+      "input_fields": ["title", "meta_description","body_content", "headings"],
+      "occ_category": "dictionary",
+      "occ_tag": "p",
+      "output_fields": ["id", "url", "image", "title", "meta_description", "occ_category", "occ_tag", "last_crawled_at"],
+      "sort_field": "date",
+      "sort_order": "desc",
+      "from": 0,
+      "size": 10
+    }
+}
+
+GET /_application/search_application/sa-elmex.de-u/_search
+{
+  "params": {
+    "query_string": "suche",
+    "input_fields": [
+         {"name": "title"}, 
+          {"name": "meta_description"}, 
+          {"name": "body_content"}, 
+          {"name": "headings"} 
+    ],
+    //"occ_category": "dictionary",
+    //"occ_tag": "p",
+    "output_fields": ["id", "url", "image", "title", "meta_description", "occ_category", "occ_tag", "last_crawled_at"],
+	"highlight_fields": ["title", "meta_description", "body_content", "headings"],
+    "sort_field": "date",
+    "sort_order": "desc",
+    "from": 0,
+    "size": 10
+  }
+}
+
+PUT /_application/search_application/sa-elmex.de-u
+{
+  "indices": ["search-elmex.de-u"],
+  "template": {
+    "script": {
+    "lang": "mustache",
+    "source": {
+      "query": {
+        "bool": {
+          "must": [
+            {
+              "multi_match": {
+                "query": "{{query_string}}",
+                "fields": "{{input_fields}}",
+                "operator": "or"
+              }
+            }
+          ],
+          "filter": [
+            {
+              "term": {
+                "occ_category": "{{occ_category}}"
+              }
+            },
+            {
+              "term": {
+                "occ_tag": "{{occ_tag}}"
+              }
+            }
+          ]
+        }
+      },
+      "_source": "{{output_fields}}",
+      "highlight": {
+        "fields": {
+          "{{input_fields}}": {}
+        }
+      },
+      "sort": [
+        {
+          "{{sort_field}}": {
+            "order": "{{sort_order}}"
+          }
+        }
+      ],
+      "from": "{{from}}",
+      "size": "{{size}}"
+    }
+   }
+  }
+}
+
+////////////////////////////////////
+
+PUT _application/search_application/base_search
+{
+	"indices": [
+		"search-elmex.de-u"
+	],
+	"template": {
+		"script": {
+			"lang": "mustache",
+			"source":
+			 """
+			 {
+				"query": {
+					"multi_match": {
+						"query": "{{query_string}}",
+						"fields": [
+							{
+								{#text_fields
+								}
+							}"{{name}}",
+							{
+								{/text_fields
+								}
+							}
+						]
+					}
+				},
+				"_source": [
+					"id",
+					"url",
+					"image",
+					"title",
+					"meta_description",
+					"occ_category",
+					"occ_tag",
+					"last_crawled_at",
+					"occ_brand",
+					"occ_format",
+					"occ_type",
+					"referencedProduct",
+					"occ_letterTag",
+					"published_date"
+				],
+				"from": "{{from}}",
+				"size": "{{size}}"
+			}
+			""",
+			"params": {
+				"idx": "search-elmex.de-u"
+				"query_string": "suche",
+				"text_fields": [
+					{
+						"name": "title"
+					},
+					{
+						"name": "meta_description"
+					},
+					{
+						"name": "body_content"
+					},
+					{
+						"name": "headings"
+					}
+				],
+				"from": 0,
+				"size": 10
+			}
+		}
+	}
+}
