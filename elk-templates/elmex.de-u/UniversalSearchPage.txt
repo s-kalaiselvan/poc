@@ -1,4 +1,17 @@
 DELETE /_application/search_application/sa-elmex.de-u
+
+PUT /_application/search_application/sa-elmex.de-u
+{
+//This is for postman which has no parsing complain if the source in one line
+  "indices": ["search-elmex.de-u"],
+  "template": {
+    "script": {
+      "lang": "mustache",
+      "source": "{\n\"query\": {\n\"bool\": {\n\"must\": [\n{\n\"multi_match\": {\n\"query\": \"{{query_string}}\",\n\"fields\": [{{#input_fields}}\"{{name}}\",{{/input_fields}}],\n\"operator\": \"or\"\n}\n}\n],\n\"filter\": [\n{{#filters}}\n{\n\"term\": {\n\"{{key}}\": \"{{value}}\"\n}\n}\n{{^isLast}},{{/isLast}}\n{{/filters}}\n]\n}\n},\n\"_source\": [{{#output_fields}}\"{{name}}\",{{/output_fields}}],\n{{#sort_field}}\n\"sort\": [\n{\n\"{{sort_field}}\": {\n\"order\": \"{{sort_order}}\"\n}\n}\n],\n{{/sort_field}}\n\"highlight\": {\n\"fields\": {\n{{#output_fields}}\"{{name}}\": {}{{^isLast}},{{/isLast}}{{/output_fields}}\n}\n},\n\"from\": \"{{from}}\",\n\"size\": \"{{size}}\"\n}"
+    }
+  }
+}
+
 PUT /_application/search_application/sa-elmex.de-u
 {
   "indices": ["search-elmex.de-u"],
@@ -13,7 +26,7 @@ PUT /_application/search_application/sa-elmex.de-u
                 {
                   "multi_match": {
                     "query": "{{query_string}}",
-                    "fields": [{{#input_fields}}"{{name}}",{{/input_fields}}],                    
+                    "fields": [{{#input_fields}}"{{name}}",{{/input_fields}}],
                     "operator": "or"
                   }
                 }
