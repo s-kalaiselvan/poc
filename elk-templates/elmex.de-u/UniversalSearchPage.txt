@@ -55,7 +55,7 @@ PUT /_application/search_application/sa-elmex.de-u
           {{/sort_field}}
           "highlight": {
             "fields": {
-              {{#output_fields}}"{{name}}": {}{{^isLast}},{{/isLast}}{{/output_fields}}
+              {{#input_fields}}"{{name}}": {}{{^isLast}},{{/isLast}}{{/input_fields}}
             }
           },
           "from": "{{from}}",

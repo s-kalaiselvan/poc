@@ -1,0 +1,82 @@
+//=================================
+// Site Search Render
+//=================================
+GET /_application/search_application/sa-elmex.de-u/_search
+{	
+  "params": {
+    "query_string": "sensitive",
+    "input_fields": [
+      {"name": "title", "isLast": false},
+      {"name": "body_content", "isLast": false},
+      {"name": "headings", "isLast": false},
+      {"name": "meta_description", "isLast": false},
+      {"name": "image", "isLast": false},
+      {"name": "url", "isLast": true}
+    ],
+    "output_fields": [
+      {"name": "body_content", "isLast": false},
+      {"name": "headings", "isLast": false},
+	  {"name": "id", "isLast": false},
+      {"name": "url", "isLast": false},
+      {"name": "image", "isLast": false},
+	  {"name": "title", "isLast": false},
+	  {"name": "meta_description", "isLast": false},
+	  {"name": "occ_category", "isLast": false},
+	  {"name": "occ_tag", "isLast": false},
+	  {"name": "last_crawled_at", "isLast": true}
+	 ],
+    "sort_field": "date",
+    "sort_order": "desc",
+    "from": 0,
+    "size": 10
+  }
+}
+
+//=================================
+// App SA Dictionary perform Search:
+//=================================
+
+GET /_application/search_application/sa-elmex.de-u/_search
+{
+  "params": {
+    "query_string": "Abszess",
+    "input_fields": [
+      {"name": "title", "isLast": false},
+      {"name": "body_content", "isLast": false},
+      {"name": "headings", "isLast": true},
+      {"name": "meta_description", "isLast": true},
+      {"name": "image", "isLast": true},
+      {"name": "url", "isLast": false}
+    ],
+    "filters": [
+      {"key": "occ_category", "value": "dictionary"}
+    ],
+    "output_fields": [
+      {"name": "body_content", "isLast": false},
+      {"name": "headings", "isLast": false},
+      {"name": "id", "isLast": false},
+      {"name": "url", "isLast": false},
+      {"name": "image", "isLast": false},
+      {"name": "title", "isLast": false},
+      {"name": "meta_description", "isLast": false},
+      {"name": "occ_category", "isLast": false},
+      {"name": "occ_tag", "isLast": false},
+      {"name": "last_crawled_at", "isLast": true}
+//      false}, {"name": "occ_brand", "isLast": false},
+//      {"name": "occ_format", "isLast": false},
+//      {"name": "occ_type", "isLast": false},
+//	  {"name": "referencedProduct", "isLast": false},
+//	  {"name": "occ_letterTag", "isLast": false},
+//	  {"name": "published_date", "isLast": true}
+   ],
+    "sort_field": "date",
+    "sort_order": "desc",
+    "from": 0,
+    "size": 10
+  }
+}
+
+//=================================
+// App SA Dictionary Filter perform Search: Alphabetic letter button clicked
+//=================================
+
