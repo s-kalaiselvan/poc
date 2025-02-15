@@ -1,0 +1,109 @@
+1. Dictionary filter search -> alphabetic letter button clicked 
+   https://devaem-cloud.elmex.de/articles/dictionary
+   {"query":{"bool":{"must":[{"match":{"occ_tag":"a"}},{"match":{"occ_category":"dictionary"}}]}},"size":1000} 
+2. Dictionary filter search – On Page loading this URL
+   https://devaem-cloud.elmex.de/articles/dictionary  
+   {"query":{"bool":{"must":[{"match":{"occ_category":"dictionary"}}]}},"size":1000} 
+3. Site search ->  Auto loading https://devaem-cloud.elmex.de/search
+   {"query":{"match_phrase_prefix":{"title":{"query":"sen","slop":3}}},"_source":["title","id","url"],"size":5} 
+
+Template for the above requirement:-
+
+PUT /_application/search_application/sa-elmex.de_u
+{
+  "indices": ["search-elmex.de-u"],
+  "template": {
+    "script": {
+      "lang": "mustache",
+      "source": """
+{
+    "query": {
+        {{#match_phrase_prefix}}
+        "match_phrase_prefix": {
+            "{{field}}": {
+            "query": "{{query_string}}",
+            "slop": "{{slop}}"
+            }
+        }
+        {{/match_phrase_prefix}}
+
+        {{#bool_query}}
+        "bool": {
+            "must": [
+            {{#must_queries}}
+            {
+                "match": {
+                "{{field}}": "{{value}}"
+                }
+            }
+            {{^isLast}},{{/isLast}}
+            {{/must_queries}}
+            ]
+        }
+        {{/bool_query}}
+    },
+    "_source": [
+        {{#output_fields}}"{{.}}",{{/output_fields}}
+    ],
+    {{#sort_field}}
+        "sort": [
+        {
+            "{{sort_field}}": {
+            "order": "{{sort_order}}"
+            }
+        }
+        ],
+    {{/sort_field}}
+    "size": "{{size}}"
+}
+      """
+    }
+  }
+}
+
+// 1. Dictionary filter search -> alphabetic letter button clicked
+GET /_application/search_application/sa-elmex.de_u/_search
+{
+  "params": {
+    "bool_query": true,
+    "must_queries": [
+        {"field": "occ_tag", "value": "a"},
+        {"field": "occ_category", "value": "dictionary"}
+    ],
+    "size": 1000,
+    "sort_field": "date",//Optional
+    "sort_order": "desc",//Optional
+    "output_fields": ["title", "id", "url"]
+    }
+}
+
+// 2. Dictionary filter search – On Page loading this URL
+GET /_application/search_application/sa-elmex.de_u/_search
+{
+    "params": {
+    "bool_query": true,
+    "must_queries": [
+        {"field": "occ_category", "value": "dictionary"}
+    ],
+    "size": 1000,
+    "sort_field": "date",//Optional
+    "sort_order": "desc",//Optional
+    "output_fields": ["title", "id", "url"]
+    }
+}
+
+// 3. Site search ->  Auto loading https://devaem-cloud.elmex.de/search
+POST /_application/search_application/sa-elmex.de_u/_render_query
+GET /_application/search_application/sa-elmex.de_u/_search
+{
+  "params": {
+  "match_phrase_prefix": true,
+  "field": "title",
+  "query_string": "sen",
+  "slop": 3,
+  "size": 5,
+  "sort_field": "date",//Optional
+  "sort_order": "desc",//Optional
+  "output_fields": ["title", "id", "url"]
+  }
+}
