@@ -43,10 +43,10 @@ GET /_application/search_application/sa-elmex.de-u/_search
     "input_fields": [
       {"name": "title", "isLast": false},
       {"name": "body_content", "isLast": false},
-      {"name": "headings", "isLast": true},
-      {"name": "meta_description", "isLast": true},
-      {"name": "image", "isLast": true},
-      {"name": "url", "isLast": false}
+      {"name": "headings", "isLast": false},
+      {"name": "meta_description", "isLast": false},
+      {"name": "image", "isLast": false},
+      {"name": "url", "isLast": true}
     ],
     "filters": [
       {"key": "occ_category", "value": "dictionary"}
