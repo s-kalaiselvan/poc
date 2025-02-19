@@ -32,9 +32,7 @@ PUT /_application/search_application/sa-elmex.de-u
         {
           "multi_match": {
             "query": "{{query_string}}",
-            "fields": [
-              {{#input_fields}}"{{name}}^{{boost}}"{{^isLast}},{{/isLast}}{{/input_fields}}
-            ],
+            "fields": {{#toJson}}input_fields{{/toJson}},
             "operator": "or"
           }
         }
@@ -53,9 +51,7 @@ PUT /_application/search_application/sa-elmex.de-u
     }
     {{/bool_query}}
   },
-  "_source": [
-    {{#output_fields}}"{{name}}",{{/output_fields}}
-  ],
+  "_source": {{#toJson}}output_fields{{/toJson}},
 
   {{#sort_field}}
   "sort": [
@@ -69,9 +65,7 @@ PUT /_application/search_application/sa-elmex.de-u
 
   {{#highlight}}
   "highlight": {
-    "fields": {
-      {{#input_fields}}"{{name}}": {}{{^isLast}},{{/isLast}}{{/input_fields}}
-    }
+    "fields": {{#toJson}}highlight_fields{{/toJson}}
   },
   {{/highlight}}
 
@@ -87,7 +81,7 @@ PUT /_application/search_application/sa-elmex.de-u
   "indices": ["search-elmex.de-u"],
   "template": {
     "script": {
-      "source": "{\n  \"query\": {\n    {{#match_phrase_prefix}}\n    \"match_phrase_prefix\": {\n      \"{{field}}\": {\n        \"query\": \"{{query_string}}\",\n       \n    \"slop\": \"{{slop}}\"\n      }\n    }\n    {{/match_phrase_prefix}}\n\n    {{#bool_query}}\n    \"bool\": {\n      \"must\": [\n        {{#must_queries}}\n        {\n          \"match\": {\n            \"{{field}}\": \"{{value}}\"\n          }\n        }\n        {{^isLast}},{{/isLast}}\n       \n{{/must_queries}}\n        \n        {{#multi_match}}\n        {\n          \"multi_match\": {\n            \"query\": \"{{query_string}}\",\n            \"fields\": [\n              {{#input_fields}}\"{{name}}\"{{^isLast}},{{/isLast}}{{/input_fields}}\n            ],\n            \"operator\": \"or\"\n          }\n        }\n        {{/multi_match}}\n      ],\n      \"filter\": [\n        {{#filters}}\n        {\n          \"term\": {\n            \"{{key}}\": \"{{value}}\"\n          }\n        }\n        {{^isLast}},{{/isLast}}\n        {{/filters}}\n      ]\n    }\n    {{/bool_query}}\n  },\n  \"_source\": [\n   \n{{#output_fields}}\"{{name}}\",{{/output_fields}}\n  ],\n\n  {{#sort_field}}\n  \"sort\": [\n    {\n      \"{{sort_field}}\": {\n        \"order\": \"{{sort_order}}\"\n      }\n    }\n  ],\n  {{/sort_field}}\n\n  {{#highlight}}\n  \"highlight\": {\n    \"fields\": {\n      {{#input_fields}}\"{{name}}\":\n{}{{^isLast}},{{/isLast}}{{/input_fields}}\n    }\n  },\n  {{/highlight}}\n\n  \"size\": \"{{size}}\"\n}",
+      "source": "{\n\"query\": {\n{{#match_phrase_prefix}}\n\"match_phrase_prefix\": {\n\"{{field}}\": {\n\"query\": \"{{query_string}}\",\n\"slop\": \"{{slop}}\"\n}\n}\n{{/match_phrase_prefix}}\n\n{{#bool_query}}\n\"bool\": {\n\"must\": [\n{{#must_queries}}\n{\n\"match\": {\n\"{{field}}\": \"{{value}}\"\n}\n}\n{{^isLast}},{{/isLast}}\n{{/must_queries}}\n        \n{{#multi_match}}\n{\n\"multi_match\": {\n\"query\": \"{{query_string}}\",\n\"fields\": {{#toJson}}input_fields{{/toJson}},\n\"operator\": \"or\"\n}\n}\n{{/multi_match}}\n],\n\"filter\": [\n{{#filters}}\n{\n\"term\": {\n\"{{key}}\": \"{{value}}\"\n}\n}\n{{^isLast}},{{/isLast}}\n{{/filters}}\n]\n}\n{{/bool_query}}\n},\n\"_source\": {{#toJson}}output_fields{{/toJson}},\n\n{{#sort_field}}\n\"sort\": [\n{\n\"{{sort_field}}\": {\n\"order\": \"{{sort_order}}\"\n}\n}\n],\n{{/sort_field}}\n\n{{#highlight}}\n\"highlight\": {\n\"fields\":\n{{#toJson}}highlight_fields{{/toJson}}\n},\n{{/highlight}}\n\n\"size\": \"{{size}}\"\n}",
 	  "lang": "mustache"
 	  }
   }
@@ -96,7 +90,7 @@ PUT /_application/search_application/sa-elmex.de-u
 // 1. Site Search
 //=================================
 //POST /_application/search_application/sa-elmex.de-u/_render_query
-GET /_application/search_application/sa-elmex.de-u/_search
+POST /_application/search_application/sa-elmex.de-u/_search
 {	
   "params": {
     "bool_query": true,
@@ -104,25 +98,14 @@ GET /_application/search_application/sa-elmex.de-u/_search
     "highlight": true,
     "query_string": "sensitive",
     "input_fields": [
-      {"name": "title", "isLast": false},
-      {"name": "body_content", "isLast": false},
-      {"name": "headings", "isLast": false},
-      {"name": "meta_description", "isLast": false},
-      {"name": "image", "isLast": false},
-      {"name": "url", "isLast": true}
+      "title^1", "body_content^0.85", "headings^0.95", "meta_description^0.90", "image^0.85", "url^0.85"
     ],
     "output_fields": [
-      {"name": "body_content", "isLast": false},
-      {"name": "headings", "isLast": false},
-	  {"name": "id", "isLast": false},
-      {"name": "url", "isLast": false},
-      {"name": "image", "isLast": false},
-	  {"name": "title", "isLast": false},
-	  {"name": "meta_description", "isLast": false},
-	  {"name": "occ_category", "isLast": false},
-	  {"name": "occ_tag", "isLast": false},
-	  {"name": "last_crawled_at", "isLast": true}
-	 ],
+		"body_content", "headings", "id", "url", "image", "title", "meta_description", "occ_category", "occ_tag", "last_crawled_at"
+	],
+    "highlight_fields": [
+      {"title": {}}, {"body_content": {}}, {"headings": {}},{"meta_description": {}}
+    ],
     "sort_field": "id",
     "sort_order": "desc",
     "from": 0,
@@ -141,28 +124,17 @@ GET /_application/search_application/sa-elmex.de-u/_search
     "highlight": true,
     "query_string": "Abszess",
     "input_fields": [
-      {"name": "title", "isLast": false},
-      {"name": "body_content", "isLast": false},
-      {"name": "headings", "isLast": false},
-      {"name": "meta_description", "isLast": false},
-      {"name": "image", "isLast": false},
-      {"name": "url", "isLast": true}
+      "title^1", "body_content^0.85", "headings^0.95", "meta_description^0.90", "image^0.85", "url^0.85"
     ],
     "filters": [
       {"key": "occ_category", "value": "dictionary", "isLast": true}
     ],
     "output_fields": [
-      {"name": "body_content", "isLast": false},
-      {"name": "headings", "isLast": false},
-      {"name": "id", "isLast": false},
-      {"name": "url", "isLast": false},
-      {"name": "image", "isLast": false},
-      {"name": "title", "isLast": false},
-      {"name": "meta_description", "isLast": false},
-      {"name": "occ_category", "isLast": false},
-      {"name": "occ_tag", "isLast": false},
-      {"name": "last_crawled_at", "isLast": true}
-   ],
+	   "body_content", "headings", "id", "url", "image", "title", "meta_description", "occ_category", "occ_tag", "last_crawled_at"
+    ],
+    "highlight_fields": [
+      {"title": {}}, {"body_content": {}}, {"headings": {}},{"meta_description": {}}
+    ],
     "sort_field": "id",
     "sort_order": "desc",
     "from": 0,
@@ -182,11 +154,9 @@ GET /_application/search_application/sa-elmex.de-u/_search
     ],
     "size": 1000,
 	"output_fields": [
-	     {"name": "title", "isLast": false},
-	     {"name": "id", "isLast": false},
-	     {"name": "url", "isLast": true}
-	  ]
-    }
+		"title", "id", "url"
+	 ]
+  }
 }
 
 //=================================
@@ -195,18 +165,16 @@ GET /_application/search_application/sa-elmex.de-u/_search
 GET /_application/search_application/sa-elmex.de-u/_search
 {
     "params": {
-    "bool_query": true,
-    "must_queries": [
-        {"field": "occ_category", "value": "dictionary"}
-    ],
-    "size": 1000,
-    "sort_field": "id",//Optional
-    "sort_order": "desc",//Optional
-	"output_fields": [
-	     {"name": "title", "isLast": false},
-	     {"name": "id", "isLast": false},
-	     {"name": "url", "isLast": true}
-	  ]
+	    "bool_query": true,
+	    "must_queries": [
+	        {"field": "occ_category", "value": "dictionary"}
+	    ],
+	    "size": 1000,
+	    "sort_field": "id",//Optional
+	    "sort_order": "desc",//Optional
+		"output_fields": [
+		     "title", "id", "url"
+		]
     }
 }
 //=================================
@@ -215,17 +183,15 @@ GET /_application/search_application/sa-elmex.de-u/_search
 GET /_application/search_application/sa-elmex.de-u/_search
 {
   "params": {
-  "match_phrase_prefix": true,
-  "field": "title",
-  "query_string": "sen",
-  "slop": 3,
-  "size": 5,
-  "sort_field": "id",
-  "sort_order": "desc",
-  "output_fields": [
-     {"name": "title", "isLast": false},
-     {"name": "id", "isLast": false},
-     {"name": "url", "isLast": true}
-  ]
+	  "match_phrase_prefix": true,
+	  "field": "title",
+	  "query_string": "sen",
+	  "slop": 3,
+	  "size": 5,
+	  "sort_field": "id",
+	  "sort_order": "desc",
+	  "output_fields": [
+	     "title", "id", "url"
+	  ]
   }
 }
