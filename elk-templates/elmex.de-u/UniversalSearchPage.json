@@ -69,7 +69,9 @@ PUT /_application/search_application/sa-elmex.de-u
   },
   {{/highlight}}
 
-  "from": "{{from}}",
+  {{#from}}
+    "from": "{{from}}",
+  {{/from}}
   "size": "{{size}}"
 }
 """
@@ -82,7 +84,7 @@ PUT /_application/search_application/sa-elmex.de-u
   "indices": ["search-elmex.de-u"],
   "template": {
     "script": {
-      "source": "{\n\"query\": {\n{{#match_phrase_prefix}}\n\"match_phrase_prefix\": {\n\"{{field}}\": {\n\"query\": \"{{query_string}}\",\n\"slop\": \"{{slop}}\"\n}\n}\n{{/match_phrase_prefix}}\n\n{{#bool_query}}\n\"bool\": {\n\"must\": [\n{{#must_queries}}\n{\n\"match\": {\n\"{{field}}\": \"{{value}}\"\n}\n}\n{{^isLast}},{{/isLast}}\n{{/must_queries}}\n        \n{{#multi_match}}\n{\n\"multi_match\": {\n\"query\": \"{{query_string}}\",\n\"fields\": {{#toJson}}input_fields{{/toJson}},\n\"operator\": \"or\"\n}\n}\n{{/multi_match}}\n],\n\"filter\": [\n{{#filters}}\n{\n\"term\": {\n\"{{key}}\": \"{{value}}\"\n}\n}\n{{^isLast}},{{/isLast}}\n{{/filters}}\n]\n}\n{{/bool_query}}\n},\n\"_source\": {{#toJson}}output_fields{{/toJson}},\n\n{{#sort_field}}\n\"sort\": [\n{\n\"{{sort_field}}\": {\n\"order\": \"{{sort_order}}\"\n}\n}\n],\n{{/sort_field}}\n\n{{#highlight}}\n\"highlight\": {\n\"fields\":\n{{#toJson}}highlight_fields{{/toJson}}\n},\n{{/highlight}}\n\"from\": \"{{from}}\",\n\"size\": \"{{size}}\"\n}",
+      "source": "{\n\"query\": {\n{{#match_phrase_prefix}}\n\"match_phrase_prefix\": {\n\"{{field}}\": {\n\"query\": \"{{query_string}}\",\n\"slop\": \"{{slop}}\"\n}\n}\n{{/match_phrase_prefix}}\n\n{{#bool_query}}\n\"bool\": {\n\"must\": [\n{{#must_queries}}\n{\n\"match\": {\n\"{{field}}\": \"{{value}}\"\n}\n}\n{{^isLast}},{{/isLast}}\n{{/must_queries}}\n        \n{{#multi_match}}\n{\n\"multi_match\": {\n\"query\": \"{{query_string}}\",\n\"fields\": {{#toJson}}input_fields{{/toJson}},\n\"operator\": \"or\"\n}\n}\n{{/multi_match}}\n],\n\"filter\": [\n{{#filters}}\n{\n\"term\": {\n\"{{key}}\": \"{{value}}\"\n}\n}\n{{^isLast}},{{/isLast}}\n{{/filters}}\n]\n}\n{{/bool_query}}\n},\n\"_source\": {{#toJson}}output_fields{{/toJson}},\n\n{{#sort_field}}\n\"sort\": [\n{\n\"{{sort_field}}\": {\n\"order\": \"{{sort_order}}\"\n}\n}\n],\n{{/sort_field}}\n\n{{#highlight}}\n\"highlight\": {\n\"fields\":\n{{#toJson}}highlight_fields{{/toJson}}\n},\n{{/highlight}}\n{{#from}} \"from\": \"{{from}}\", {{/from}}\n\"size\": \"{{size}}\"\n}",
 	  "lang": "mustache"
 	  }
   }
