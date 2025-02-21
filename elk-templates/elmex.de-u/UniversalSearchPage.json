@@ -157,7 +157,7 @@ GET /_application/search_application/sa-elmex.de-u/_search
     ],
     "size": 1000,
 	"output_fields": [
-		"title", "id", "url"
+		"title", "id", "url", "occ_tag"
 	 ]
   }
 }
@@ -176,7 +176,7 @@ GET /_application/search_application/sa-elmex.de-u/_search
 	    "sort_field": "id",//Optional
 	    "sort_order": "desc",//Optional
 		"output_fields": [
-		     "title", "id", "url"
+		     "title", "id", "url", "occ_tag"
 		]
     }
 }
